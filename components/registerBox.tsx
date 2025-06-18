@@ -44,7 +44,7 @@ export function RegisterBox() {
           role: "candidate", // Ensure candidates register via this form
         }
       );
-
+      console.log("Registration response:", response.data);
       alert("Registration successful! Please log in.");
       router.push("/login"); // Redirect to login page
     } catch (error) {

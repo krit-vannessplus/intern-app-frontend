@@ -38,12 +38,16 @@ export default function ResultBox({ email }: ResultBoxProps) {
       <CardContent>
         {result?.result === "accepted" ? (
           <div>
-            <p className="text-md">Congratulation, you've been accepted.</p>
+            <p className="text-md">
+              Congratulation, you&apos;ve been accepted.
+            </p>
             <p className="text-md">Positions: {result.positions.join(", ")}</p>
           </div>
         ) : (
           <div>
-            <p className="text-md">We're so sorry, you've been rejected</p>
+            <p className="text-md">
+              We&apos;re so sorry, you&apos;ve been rejected
+            </p>
             <p className="text-md">Keep fighting, one day will be your day!</p>
           </div>
         )}

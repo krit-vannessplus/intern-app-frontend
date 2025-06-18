@@ -37,7 +37,7 @@ export default function CreateResult({
   email: propEmail,
   backAction,
 }: CreateResultProps) {
-  const [userEmail, setUserEmail] = useState<string | null>(propEmail);
+  const [userEmail] = useState<string | null>(propEmail);
   const [personalInfo, setPersonalInfo] = useState<any>(null);
   const [offer, setOffer] = useState<any>(null);
   const [requestData, setRequestData] = useState<any>(null); // holds resume request data
@@ -83,7 +83,7 @@ export default function CreateResult({
     if (token) {
       fetchData();
     }
-  }, []);
+  }, [userEmail, token]);
 
   useEffect(() => {
     const fetchPositions = async () => {

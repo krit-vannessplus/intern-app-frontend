@@ -80,7 +80,7 @@ export default function ConsideringBox() {
     <div className="space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle>We're Considering Offer for {email}</CardTitle>
+          <CardTitle>We&apos;re Considering Offer for {email}</CardTitle>
           <p className="text-sm text-muted-foreground">
             {
               "After finish considering, we'll contact you. You can view the personal information and offer details below."

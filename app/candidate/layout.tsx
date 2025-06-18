@@ -33,6 +33,7 @@ export default function ProtectedLayout({ children }: Props) {
         setChecking(false);
       } catch (err) {
         // Invalid / expired – clear and bounce to login
+        console.error("verification failed:", err);
         localStorage.removeItem("token");
         localStorage.removeItem("role");
         router.replace("/login");

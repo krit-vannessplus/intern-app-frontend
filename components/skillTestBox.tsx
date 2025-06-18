@@ -81,6 +81,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
         // enrich each test with pdf + position
         enrichSkillTest(offer);
       } catch (e) {
+        console.error("Error fetching user or offer:", e);
         router.push("/login"); // Redirect to login on error
       }
     })();
