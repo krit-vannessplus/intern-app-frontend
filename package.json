@@ -27,7 +27,6 @@
     "lucide-react": "^0.512.0",
     "next": "15.3.3",
     "pg": "^8.16.0",
-    "prisma": "^6.9.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.57.0",
