@@ -1,6 +1,6 @@
 "use client";
 import { API_URL } from "@/utils/config"; // Ensure you have the correct API URL
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import RequestBox from "@/components/requestBox";
 import { PersonalInfoBox } from "@/components/personalInfoBox";

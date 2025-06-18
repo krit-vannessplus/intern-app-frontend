@@ -52,17 +52,6 @@ export default function CreateResult({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        /*// When no email is provided from props, fetch current user email.
-        if (!userEmail) {
-          const {
-            data: { email: fetchedEmail },
-          } = await axios.get(`${API_URL}/api/users/user`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!fetchedEmail) return;
-          setUserEmail(fetchedEmail);
-        }*/
-
         // fetch personal info using the email
         const { data: piData } = await axios.get(
           `${API_URL}/api/personalInfos/getByEmail/${encodeURIComponent(

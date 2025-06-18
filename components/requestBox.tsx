@@ -1,7 +1,7 @@
 "use client";
 
 import { API_URL } from "@/utils/config"; // Ensure you have the correct API URL
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -46,10 +46,6 @@ interface User {
 // --- RequestBox Component ---
 
 const RequestBox: React.FC = () => {
-  // Local state.
-  // ------------------------------------
-  // state
-  // ------------------------------------
   const [user, setUser] = useState<User | null>(null);
   const [existingRequest, setExistingRequest] = useState<RequestData | null>(
     null

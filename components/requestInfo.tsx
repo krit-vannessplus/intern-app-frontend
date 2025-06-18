@@ -1,6 +1,6 @@
 "use client";
 import { API_URL } from "@/utils/config";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardHeader,

@@ -1,4 +1,3 @@
-// components/SkillTestBox.tsx
 "use client";
 
 import React, { useState, useEffect, ChangeEvent } from "react";

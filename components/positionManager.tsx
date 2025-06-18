@@ -36,11 +36,6 @@ const PositionManager = () => {
     } catch (error) {
       console.error("Error fetching positions:", error);
     }
-    // setPositions([
-    //   { name: "Software Engineer", availability: true },
-    //   { name: "Product Manager", availability: false },
-    //   { name: "Fullstack Developer", availability: true },
-    // ]); // Mock data for testing
     setLoading(false);
   };
 

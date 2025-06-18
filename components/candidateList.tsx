@@ -5,7 +5,6 @@ import axios from "axios";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { API_URL } from "@/utils/config";
 
 import CandidateInfo from "./candidateInfo"; // ←– the detail component we built earlier

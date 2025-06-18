@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { API_URL } from "@/utils/config";
-import { useForm, Controller, set } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
