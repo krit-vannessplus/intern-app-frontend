@@ -121,6 +121,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
         return;
       }
 
+      console.log("submited data: ", data);
       const formData = new FormData();
       Object.keys(data).forEach((key) => {
         if (
