@@ -112,7 +112,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
     };
 
     fetchPersonalInfo();
-  }, [reset, token]);
+  }, [reset, token, files]);
 
   const onSubmit = async (data: any) => {
     try {
