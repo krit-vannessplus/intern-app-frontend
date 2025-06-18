@@ -1,7 +1,7 @@
 "use client";
 
 import { API_URL } from "@/utils/config"; // Ensure you have the correct API URL
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import axios from "axios";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -47,21 +47,26 @@ interface User {
 
 const RequestBox: React.FC = () => {
   // Local state.
+  // ------------------------------------
+  // state
+  // ------------------------------------
   const [user, setUser] = useState<User | null>(null);
   const [existingRequest, setExistingRequest] = useState<RequestData | null>(
     null
   );
-  const [editMode, setEditMode] = useState<boolean>(false);
+  const [editMode, setEditMode] = useState(false);
   const [positions, setPositions] = useState<Position[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
-  // Initialize react-hook-form.
+  // react-hook-form
   const { register, handleSubmit, reset } = useForm<RequestFormValues>();
 
-  // On mount, fetch user status, request (if applicable), and available positions.
+  // ------------------------------------
+  // 1) Fetch user & positions ONCE
+  // ------------------------------------
   useEffect(() => {
-    const fetchUserAndRequest = async () => {
+    (async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -69,75 +74,78 @@ const RequestBox: React.FC = () => {
           return;
         }
 
-        // Fetch the user status to get the email and status.
         const { data: userData } = await axios.get(
           `${API_URL}/api/users/user`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        if (userData && userData.email) {
-          const currentUser = userData as User;
-          setUser(currentUser);
-
-          // If the user status indicates “requesting,” fetch the request details.
-          if (currentUser.status === "requesting") {
-            try {
-              const { data: reqData } = await axios.get(
-                `${API_URL}/api/requests/getRequest/${currentUser.email}`
-              );
-              if (reqData && reqData.request) {
-                setExistingRequest(reqData.request);
-                reset({
-                  email: reqData.request.email,
-                  positions: reqData.request.positions,
-                });
-                setEditMode(false);
-              }
-              console.log("Existing Request:", reqData.request);
-            } catch (reqError) {
-              if (axios.isAxiosError(reqError)) {
-                // If it's a 404, no existing request is available – that’s fine.
-                if (reqError.response && reqError.response.status === 404) {
-                  setExistingRequest(null);
-                } else {
-                  console.error("Error fetching request:", reqError);
-                  setError("Error fetching your request data.");
-                }
-              } else {
-                console.error("Unknown error fetching request:", reqError);
-                setError("Unknown error fetching request data.");
-              }
-            }
-          } else if (currentUser.status === "waiting") {
-            setExistingRequest(null);
-          }
-        } else {
+        if (!userData?.email) {
           setError("User email not found in user status response.");
+          return;
         }
-      } catch (userError) {
-        console.error("Error fetching user status:", userError);
+
+        setUser(userData as User); // ⬅️  triggers the second effect
+        console.log("User data fetched:", userData);
+      } catch (err) {
+        console.error("Error fetching user status:", err);
         setError("Error fetching user information.");
       }
-    };
+    })();
 
-    const fetchPositions = async () => {
+    (async () => {
       try {
-        const { data: posData } = await axios.get(
+        const { data } = await axios.get(
           `${API_URL}/api/positions/getAllPositions`
         );
-        const positionsArray = posData.positions as Position[];
-        setPositions(positionsArray);
-      } catch (posError) {
-        console.error("Error fetching positions:", posError);
+        setPositions(data.positions as Position[]);
+      } catch (err) {
+        console.error("Error fetching positions:", err);
         setError("Error fetching available positions.");
+      }
+    })();
+  }, []);
+
+  // ------------------------------------
+  // 2) *Every time* `user` changes, pull (or clear) the request
+  // ------------------------------------
+  useEffect(() => {
+    if (!user?.email) return; // still null? skip
+    if (user.status !== "requesting") {
+      // only keep request in that state
+      setExistingRequest(null);
+      return;
+    }
+
+    const fetchRequest = async () => {
+      console.log("Fetching request for user:", user.email);
+      try {
+        const { data } = await axios.get(
+          `${API_URL}/api/requests/getRequest/${user.email}`
+        );
+
+        if (data?.request) {
+          setExistingRequest(data.request);
+
+          // hydrate RHF
+          reset({
+            email: data.request.email,
+            positions: data.request.positions,
+          });
+          setEditMode(false);
+          console.log("Request data fetched:", data.request);
+        }
+      } catch (err) {
+        // if (axios.isAxiosError(err) && err.response?.status === 404) {
+        //   setExistingRequest(null); // user has no request yet
+        // } else {
+        console.error("Error fetching request:", err);
+        setError("Error fetching your request data.");
+        //}
       }
     };
 
-    fetchUserAndRequest();
-    fetchPositions();
-  }, [reset]);
+    fetchRequest();
+  }, [user, reset]); // <-- ONLY depends on user (and reset from RHF)
 
   // onSubmit handler for the form.
   const onSubmit: SubmitHandler<RequestFormValues> = async (data) => {
@@ -220,7 +228,7 @@ const RequestBox: React.FC = () => {
     // Compute the full URL for the resume.
     const resumeUrl = existingRequest.resume.startsWith("http")
       ? existingRequest.resume
-      : `${API_URL}/${existingRequest.resume}`;
+      : `${existingRequest.resume}`;
 
     return (
       <Card className="w-full max-w-sm">

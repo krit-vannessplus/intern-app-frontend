@@ -194,7 +194,7 @@ export default function CreateResult({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-xl mx-auto space-y-4 bg-white p-6 rounded-lg shadow-md">
       {/* Decision Card */}
       <Card>
         <CardHeader>
@@ -278,7 +278,7 @@ export default function CreateResult({
                   <Label>{formatKey(key)}</Label>
                   {value ? (
                     <a
-                      href={`${API_URL}/${value}`}
+                      href={`${value}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-blue-600 underline"
@@ -315,7 +315,7 @@ export default function CreateResult({
             <div>
               <Label>Resume</Label>
               <a
-                href={`${API_URL}/${requestData.resume}`}
+                href={`${requestData.resume}`}
                 target="_blank"
                 rel="noreferrer"
                 className="text-blue-600 underline"
@@ -355,7 +355,7 @@ export default function CreateResult({
                       {test.uploadedFiles.map((path: string, i: number) => (
                         <li key={i}>
                           <a
-                            href={`${API_URL}/${path}`}
+                            href={`${path}`}
                             target="_blank"
                             rel="noreferrer"
                             className="text-blue-600 underline"

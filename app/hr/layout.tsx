@@ -38,6 +38,11 @@ export default function ProtectedLayout({ children }: Props) {
         router.replace("/login");
       }
       const role = localStorage.getItem("role");
+      if (!role) {
+        // If no role is set, redirect to the login page
+        router.replace("/login");
+        return;
+      }
       if (role !== "admin") {
         // If the user is not an admin, redirect to the candidate page
         router.replace("/candidate");

@@ -165,7 +165,7 @@ const SkillTestManager = () => {
                   <p>
                     PDF:{" "}
                     <a
-                      href={`${API_URL}/${test.pdf}`}
+                      href={`${test.pdf}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-500 hover:underline"

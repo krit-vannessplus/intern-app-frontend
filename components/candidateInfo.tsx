@@ -95,12 +95,16 @@ export default function CandidateInfo({
           setOffer(of.offer ?? of);
         }
 
-        /* 4. resume request (holds PDF link) ----------------------------- */
-        const { data: req } = await axios.get(
-          `${API_URL}/api/requests/getRequest/${encodeURIComponent(propEmail)}`
-        );
-        console.log("Resume Request Record:", req);
-        setRequestData(req.request ?? req);
+        if (user.status !== "waiting") {
+          /* 4. resume request (holds PDF link) ----------------------------- */
+          const { data: req } = await axios.get(
+            `${API_URL}/api/requests/getRequest/${encodeURIComponent(
+              propEmail
+            )}`
+          );
+          console.log("Resume Request Record:", req);
+          setRequestData(req.request ?? req);
+        }
 
         if (
           user.status === "accepted" ||
@@ -211,7 +215,7 @@ export default function CandidateInfo({
                     <Label>{formatKey(key)}</Label>
                     {value ? (
                       <a
-                        href={`${API_URL}/${value}`}
+                        href={`${value}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-blue-600 underline"
@@ -249,7 +253,7 @@ export default function CandidateInfo({
             <div>
               <Label>Resume</Label>
               <a
-                href={`${API_URL}/${requestData.resume}`}
+                href={`${requestData.resume}`}
                 target="_blank"
                 rel="noreferrer"
                 className="text-blue-600 underline"
@@ -310,7 +314,7 @@ export default function CandidateInfo({
                         {test.uploadedFiles.map((path: string, i: number) => (
                           <li key={i}>
                             <a
-                              href={`${API_URL}/${path}`}
+                              href={`${path}`}
                               target="_blank"
                               rel="noreferrer"
                               className="text-blue-600 underline"

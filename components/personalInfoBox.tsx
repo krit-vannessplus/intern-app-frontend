@@ -339,7 +339,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
               {files?.videoClip && (
                 <div className="mb-2">
                   <a
-                    href={`${API_URL}/${files?.videoClip}`}
+                    href={`${files?.videoClip}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
@@ -363,7 +363,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
               {files?.gradeReport && (
                 <div className="mb-2">
                   <a
-                    href={`${API_URL}/${files?.gradeReport}`}
+                    href={`${files?.gradeReport}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
@@ -391,7 +391,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
               {files?.homeRegistration && (
                 <div className="mb-2">
                   <a
-                    href={`${API_URL}/${files?.homeRegistration}`}
+                    href={`${files?.homeRegistration}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
@@ -419,7 +419,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
               {files?.idCard && (
                 <div className="mb-2">
                   <a
-                    href={`${API_URL}/${files?.idCard}`}
+                    href={`${files?.idCard}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
@@ -447,7 +447,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
               {files?.slidePresentation && (
                 <div className="mb-2">
                   <a
-                    href={`${API_URL}/${files?.slidePresentation}`}
+                    href={`${files?.slidePresentation}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"

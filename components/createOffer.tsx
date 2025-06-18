@@ -195,77 +195,79 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ email, back }) => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Offer for {request.email}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="py-2">
-          <strong>Resume:</strong>{" "}
-          <a
-            href={`${API_URL}/${request.resume}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 underline"
-          >
-            View Resume
-          </a>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <strong>Positions:</strong>
-          {request.positions.map((position) => (
-            <div key={position} style={{ marginBottom: "1rem" }}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={selectedPositions[position] || false}
-                  onChange={(e) => handleCheckboxChange(e, position)}
-                />{" "}
-                {position}
-              </label>
-              {selectedPositions[position] && (
-                <div style={{ marginLeft: "1rem", marginTop: "0.5rem" }}>
-                  <label>
-                    Select Skill Test:{" "}
-                    <select
-                      value={skillTestSelections[position] || ""}
-                      onChange={(e) => handleDropdownChange(e, position)}
-                    >
-                      <option value="">-- Select Skill Test --</option>
-                      {skillTests
-                        .filter((test) => test.position === position)
-                        .map((test) => (
-                          <option key={test.name} value={test.name}>
-                            {test.name}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
-                </div>
-              )}
-            </div>
-          ))}
-          <div style={{ marginTop: "1rem" }}>
-            <label>
-              Due Time:{" "}
-              <input
-                type="datetime-local"
-                value={dueTime}
-                onChange={handleDueTimeChange}
-              />
-            </label>
+    <div className="max-w-xl mx-auto space-y-4 bg-white p-6 rounded-lg shadow-md">
+      <Card>
+        <CardHeader>
+          <CardTitle>Offer for {request.email}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="py-2">
+            <strong>Resume:</strong>{" "}
+            <a
+              href={`${request.resume}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              View Resume
+            </a>
           </div>
-          <CardFooter>
-            <div className="flex justify-between mt-4 gap-x-4">
-              <Button variant="outline" onClick={back}>
-                Back
-              </Button>
-              <Button type="submit">Send Offer</Button>
+          <form onSubmit={handleSubmit}>
+            <strong>Positions:</strong>
+            {request.positions.map((position) => (
+              <div key={position} style={{ marginBottom: "1rem" }}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={selectedPositions[position] || false}
+                    onChange={(e) => handleCheckboxChange(e, position)}
+                  />{" "}
+                  {position}
+                </label>
+                {selectedPositions[position] && (
+                  <div style={{ marginLeft: "1rem", marginTop: "0.5rem" }}>
+                    <label>
+                      Select Skill Test:{" "}
+                      <select
+                        value={skillTestSelections[position] || ""}
+                        onChange={(e) => handleDropdownChange(e, position)}
+                      >
+                        <option value="">-- Select Skill Test --</option>
+                        {skillTests
+                          .filter((test) => test.position === position)
+                          .map((test) => (
+                            <option key={test.name} value={test.name}>
+                              {test.name}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                  </div>
+                )}
+              </div>
+            ))}
+            <div style={{ marginTop: "1rem" }}>
+              <label>
+                Due Time:{" "}
+                <input
+                  type="datetime-local"
+                  value={dueTime}
+                  onChange={handleDueTimeChange}
+                />
+              </label>
             </div>
-          </CardFooter>
-        </form>
-      </CardContent>
-    </Card>
+            <CardFooter>
+              <div className="flex justify-between mt-4 gap-x-4">
+                <Button variant="outline" onClick={back}>
+                  Back
+                </Button>
+                <Button type="submit">Send Offer</Button>
+              </div>
+            </CardFooter>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

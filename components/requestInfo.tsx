@@ -48,7 +48,7 @@ const RequestCard: React.FC<RequestCardProps> = ({ email }) => {
 
   const resumeUrl = existingRequest.resume.startsWith("http")
     ? existingRequest.resume
-    : `${API_URL}/${existingRequest.resume}`;
+    : `${existingRequest.resume}`;
 
   return (
     <Card className="w-full max-w-sm">

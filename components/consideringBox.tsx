@@ -118,7 +118,7 @@ export default function ConsideringBox() {
                   <Label>{formatKey(key)}</Label>
                   {value ? (
                     <a
-                      href={`${API_URL}/${value}`}
+                      href={`${value}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-blue-600 underline"
@@ -155,7 +155,7 @@ export default function ConsideringBox() {
             <div>
               <Label>Resume</Label>
               <a
-                href={`${API_URL}/${requestData.resume}`}
+                href={`${requestData.resume}`}
                 target="_blank"
                 rel="noreferrer"
                 className="text-blue-600 underline"
@@ -196,7 +196,7 @@ export default function ConsideringBox() {
                       {test.uploadedFiles.map((path: string, i: number) => (
                         <li key={i}>
                           <a
-                            href={`${API_URL}/${path}`}
+                            href={`${path}`}
                             target="_blank"
                             rel="noreferrer"
                             className="text-blue-600 underline"

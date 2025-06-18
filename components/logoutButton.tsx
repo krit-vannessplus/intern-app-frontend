@@ -20,6 +20,7 @@ export default function LogoutButton() {
 
     /* 1️⃣ strip client-side auth artifacts */
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
     /* …clear any other persisted user data you keep… */
 
     /* 2️⃣ push the user to the login screen */

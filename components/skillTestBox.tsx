@@ -343,7 +343,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
                   <Label>Instructions</Label>
                   {test.pdf ? (
                     <a
-                      href={`${API_URL}/${test.pdf}`}
+                      href={`${test.pdf}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-blue-600 underline"
@@ -361,7 +361,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
                     {test.uploadedFiles.map((p, i) => (
                       <li key={i} className="flex items-center space-x-2">
                         <a
-                          href={`${API_URL}/${p}`}
+                          href={`${p}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:underline"
