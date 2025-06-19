@@ -12,6 +12,12 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Offer,
+  PersonalInfo,
+  Request,
+  SkillTestOffer,
+} from "@/utils/typeInterface";
 
 interface CreateResultProps {
   email: string;
@@ -38,9 +44,9 @@ export default function CreateResult({
   backAction,
 }: CreateResultProps) {
   const [userEmail] = useState<string | null>(propEmail);
-  const [personalInfo, setPersonalInfo] = useState<any>(null);
-  const [offer, setOffer] = useState<any>(null);
-  const [requestData, setRequestData] = useState<any>(null); // holds resume request data
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null);
+  const [offer, setOffer] = useState<Offer | null>(null);
+  const [requestData, setRequestData] = useState<Request | null>(null); // holds resume request data
   const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
   const [decisionLoading, setDecisionLoading] = useState<boolean>(false);
   const [positions, setPositions] = useState<string[]>([]);
@@ -89,7 +95,9 @@ export default function CreateResult({
     const fetchPositions = async () => {
       //fetch positions from the offer
       if (offer) {
-        const testNameList = offer.skillTests.map((test: any) => test.name);
+        const testNameList = offer.skillTests.map(
+          (test: SkillTestOffer) => test.name
+        );
         const positionsList: string[] = [];
         for (const name of testNameList) {
           try {
@@ -322,19 +330,21 @@ export default function CreateResult({
           <CardTitle>Offer Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {offer.skillTests.map((test: any) => (
+          {offer.skillTests.map((test: SkillTestOffer) => (
             <Card key={test.name} className="mb-4 border rounded">
               <CardHeader>
                 <CardTitle>{test.name}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {/* only showing rank + explanation */}
-                {["rank", "explanation"].map((field) => (
-                  <div key={field}>
-                    <Label>{formatKey(field)}</Label>
-                    <p>{test[field]}</p>
-                  </div>
-                ))}
+                <div>
+                  <Label>{formatKey("rank")}</Label>
+                  <p>{test.rank}</p>
+                </div>
+                <div>
+                  <Label>{formatKey("explanation")}</Label>
+                  <p>{test.explanation}</p>
+                </div>
 
                 {/* list every uploaded file as a link */}
                 <div>

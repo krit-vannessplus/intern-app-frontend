@@ -5,6 +5,12 @@ import axios from "axios";
 import { API_URL } from "@/utils/config";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import {
+  Offer,
+  PersonalInfo,
+  Request,
+  SkillTestOffer,
+} from "@/utils/typeInterface";
 
 // which personal‐info keys point at uploaded files
 const FILE_FIELDS = [
@@ -23,9 +29,9 @@ function formatKey(key: string) {
 
 export default function ConsideringBox() {
   const [email, setEmail] = useState<string | null>(null);
-  const [personalInfo, setPersonalInfo] = useState<any>(null);
-  const [offer, setOffer] = useState<any>(null);
-  const [requestData, setRequestData] = useState<any>(null); // holds resume request data
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null);
+  const [offer, setOffer] = useState<Offer | null>(null);
+  const [requestData, setRequestData] = useState<Request | null>(null); // holds resume request data
 
   // JWT for Authorization header
   const token =
@@ -174,19 +180,21 @@ export default function ConsideringBox() {
           <CardTitle>Offer Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {offer.skillTests.map((test: any) => (
+          {offer.skillTests.map((test: SkillTestOffer) => (
             <Card key={test.name} className="mb-4 border rounded">
               <CardHeader>
                 <CardTitle>{test.name}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {/* only showing rank + explanation */}
-                {["rank", "explanation"].map((field) => (
-                  <div key={field}>
-                    <Label>{formatKey(field)}</Label>
-                    <p>{test[field]}</p>
-                  </div>
-                ))}
+                <div>
+                  <Label>{formatKey("rank")}</Label>
+                  <p>{test.rank}</p>
+                </div>
+                <div>
+                  <Label>{formatKey("explanation")}</Label>
+                  <p>{test.explanation}</p>
+                </div>
 
                 {/* list every uploaded file as a link */}
                 <div>

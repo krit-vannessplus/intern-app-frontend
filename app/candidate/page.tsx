@@ -33,7 +33,7 @@ export default function CandidatePage() {
     };
 
     fetchStatus();
-  }, []);
+  }, [router]);
 
   return (
     <div className="bg-gray-100 w-full min-h-screen">

@@ -34,9 +34,34 @@ interface FileUpload {
   idCard?: string;
   slidePresentation?: string;
 }
+interface Data {
+  name: string;
+  nickname: string;
+  mobile: string;
+  address: string;
+  dob: string;
+  bloodType: string;
+  lineId: string;
+  university: string;
+  qualification: string;
+  major: string;
+  gpa: string;
+  reason: string;
+  otherReason?: string;
+  strength: string;
+  weakness: string;
+  opportunity: string;
+  threats: string;
+  recruitmentSource: string;
+  videoClip?: FileList; // File input
+  gradeReport?: FileList; // File input
+  homeRegistration?: FileList; // File input
+  idCard?: FileList; // File input
+  slidePresentation?: FileList; // File input
+}
 
 export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
-  const { control, register, handleSubmit, watch, reset } = useForm();
+  const { control, register, handleSubmit, watch, reset } = useForm<Data>();
   const [email, setEmail] = useState<string | null>(null);
   const [dueTime, setDueTime] = useState<string | null>(null);
   const [files, setFiles] = useState<FileUpload | null>(null);
@@ -114,7 +139,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
     fetchPersonalInfo();
   }, [reset, token, files]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: Data) => {
     try {
       if (!token || !email) {
         console.error("No token or email.");
@@ -133,11 +158,13 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
             "slidePresentation",
           ].includes(key)
         ) {
-          if (data[key] && data[key].length > 0) {
-            formData.append(key, data[key][0]);
+          const fileKey = key as keyof Data;
+          if (data[fileKey] && (data[fileKey] as FileList).length > 0) {
+            formData.append(key, (data[fileKey] as FileList)[0]);
           }
         } else {
-          formData.append(key, data[key]);
+          const dataKey = key as keyof Data;
+          formData.append(key, data[dataKey] as string);
         }
       });
 

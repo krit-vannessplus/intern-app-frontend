@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
+import { Offer } from "@/utils/typeInterface";
 
 interface SlillTestBoxProps {
   action: () => void;
@@ -23,7 +24,7 @@ interface SlillTestBoxProps {
 type OfferSkillTest = {
   name: string;
   uploadedFiles: string[];
-  status: "doing" | "submitted";
+  status: string;
   rank: number;
   explanation: string;
   pdf?: string;
@@ -41,7 +42,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
-  const enrichSkillTest = async (offer: any) => {
+  const enrichSkillTest = async (offer: Offer) => {
     const merged: OfferSkillTest[] = await Promise.all(
       offer.skillTests.map(async (st: OfferSkillTest) => {
         try {
@@ -55,6 +56,34 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
       })
     );
     setSkillTests(merged);
+  };
+  // AUTO‐SUBMIT handler
+  const handleAutoSubmit = async (testName: string) => {
+    if (!email) return;
+    const test = skillTests.find((t) => t.name === testName);
+    if (!test) return;
+    const fd = new FormData();
+    fd.append("keepFiles", JSON.stringify(test.uploadedFiles));
+    try {
+      const { data } = await axios.patch(
+        `${API_URL}/api/offers/submit/${encodeURIComponent(
+          email
+        )}/${encodeURIComponent(testName)}`,
+        fd,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      enrichSkillTest(data.offer);
+      if (data.allSubmitted) {
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error("Auto‐submit error:", e);
+    }
   };
 
   // 1) Fetch user → offer → enrich
@@ -85,7 +114,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
         router.push("/login"); // Redirect to login on error
       }
     })();
-  }, []);
+  }, [router, token]);
 
   // 2) Auto‐submit overdue tests
   useEffect(() => {
@@ -96,7 +125,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
         if (t.status === "doing") handleAutoSubmit(t.name);
       });
     }
-  }, [dueTime, skillTests]);
+  }, [dueTime, skillTests, handleAutoSubmit]);
 
   // 3) When all submitted → bump user status
   useEffect(() => {
@@ -114,7 +143,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
         .then(() => setUserStatusUpdated(true))
         .catch((e) => console.error("User status error:", e));
     }
-  }, [skillTests, userStatusUpdated]);
+  }, [skillTests, userStatusUpdated, email, token]);
 
   // delete an existing file from the UI list
   const handleDeleteFile = (testName: string, path: string) => {
@@ -220,35 +249,6 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
       }
     } catch (e) {
       console.error("Submit error:", e);
-    }
-  };
-
-  // AUTO‐SUBMIT handler
-  const handleAutoSubmit = async (testName: string) => {
-    if (!email) return;
-    const test = skillTests.find((t) => t.name === testName);
-    if (!test) return;
-    const fd = new FormData();
-    fd.append("keepFiles", JSON.stringify(test.uploadedFiles));
-    try {
-      const { data } = await axios.patch(
-        `${API_URL}/api/offers/submit/${encodeURIComponent(
-          email
-        )}/${encodeURIComponent(testName)}`,
-        fd,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      enrichSkillTest(data.offer);
-      if (data.allSubmitted) {
-        window.location.reload();
-      }
-    } catch (e) {
-      console.error("Auto‐submit error:", e);
     }
   };
 

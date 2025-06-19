@@ -12,15 +12,20 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  User,
+  Result,
+  PersonalInfo,
+  Offer,
+  Request,
+  Filter,
+  SkillTest,
+  SkillTestOffer,
+} from "@/utils/typeInterface"; // Adjust the import path as needed
 
 interface CandidateInfoProps {
   email: string;
   backAction: () => void;
-}
-interface Result {
-  email: string;
-  result: string;
-  positions: string[];
 }
 
 /* ────────────────────────────────────────────────────────── */
@@ -47,11 +52,11 @@ export default function CandidateInfo({
   backAction,
 }: CandidateInfoProps) {
   /* state buckets */
-  const [user, setUser] = useState<any>(null); // email, role, status
-  const [personalInfo, setPersonalInfo] = useState<any>(null);
-  const [offer, setOffer] = useState<any>(null);
-  const [requestData, setRequestData] = useState<any>(null);
-  const [filter, setFilter] = useState<any>(null); // for future filtering needs
+  const [user, setUser] = useState<User | null>(null); // email, role, status
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null);
+  const [offer, setOffer] = useState<Offer | null>(null);
+  const [requestData, setRequestData] = useState<Request | null>(null);
+  const [filter, setFilter] = useState<Filter | null>(null); // for future filtering needs
   const [result, setResult] = useState<Result | null>(null); // for future result handling
 
   const [loading, setLoading] = useState(true);
@@ -158,17 +163,17 @@ export default function CandidateInfo({
         <CardContent className="space-y-3">
           <div>
             <Label>Email</Label>
-            <p>{user.email}</p>
+            <p>{user?.email}</p>
           </div>
 
           <div>
             <Label>Role</Label>
-            <p>{user.role}</p>
+            <p>{user?.role}</p>
           </div>
 
           <div>
             <Label>Status</Label>
-            <p>{user.status}</p>
+            <p>{user?.status}</p>
           </div>
           {result && (
             <div>
@@ -291,7 +296,7 @@ export default function CandidateInfo({
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {offer.skillTests.map((test: any) => (
+            {offer.skillTests.map((test: SkillTestOffer) => (
               <Card key={test.name} className="border rounded mb-4">
                 <CardHeader>
                   <CardTitle>{test.name}</CardTitle>
@@ -299,10 +304,14 @@ export default function CandidateInfo({
 
                 <CardContent className="space-y-3">
                   {/* rank + explanation */}
-                  {["rank", "explanation", "status"].map((field) => (
+                  {(
+                    ["rank", "explanation", "status"] as Array<
+                      keyof SkillTestOffer
+                    >
+                  ).map((field) => (
                     <div key={field}>
                       <Label>{formatKey(field)}</Label>
-                      <p className="space-y-3">{test[field] + " "}</p>
+                      <p className="space-y-3">{String(test[field]) + " "}</p>
                     </div>
                   ))}
 

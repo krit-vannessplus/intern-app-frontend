@@ -21,13 +21,18 @@ export function LoginBox() {
   const router = useRouter(); // Initialize router for redirect
   const [errorMessage, setErrorMessage] = useState(""); // State for handling errors
 
+  interface Data {
+    email: string;
+    password: string;
+  }
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm<Data>();
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: Data) => {
     try {
       const response = await axios.post(
         `${API_URL}/api/users/login`, // Replace with your API URL

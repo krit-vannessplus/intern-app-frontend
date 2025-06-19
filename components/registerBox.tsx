@@ -19,6 +19,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
+interface Data {
+  email: string;
+  password: string;
+}
+
 const schema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
@@ -34,7 +39,7 @@ export function RegisterBox() {
     formState: { errors },
   } = useForm({ resolver: zodResolver(schema) });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: Data) => {
     try {
       const response = await axios.post(
         `${API_URL}/api/users/register`, // Replace with your API URL

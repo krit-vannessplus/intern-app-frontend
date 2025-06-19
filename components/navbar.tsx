@@ -6,9 +6,10 @@ import Image from "next/image";
 
 import { API_URL } from "@/utils/config";
 import LogoutButton from "./logoutButton";
+import { User } from "@/utils/typeInterface";
 
 export function Navbar() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
