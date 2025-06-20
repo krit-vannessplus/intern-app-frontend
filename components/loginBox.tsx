@@ -33,6 +33,7 @@ export function LoginBox() {
   } = useForm<Data>();
 
   const onSubmit = async (data: Data) => {
+    console.log("Login data:", data); // Log the submitted data for debugging
     try {
       const response = await axios.post(
         `${API_URL}/api/users/login`, // Replace with your API URL

@@ -65,6 +65,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
   const [email, setEmail] = useState<string | null>(null);
   const [dueTime, setDueTime] = useState<string | null>(null);
   const [files, setFiles] = useState<FileUpload | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
@@ -119,7 +120,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
             idCard: info.idCard || "",
             slidePresentation: info.slidePresentation || "",
           });
-          console.log(files);
+          console.log("files: ", files);
           setDueTime(
             new Date(info.dueTime).toLocaleString("en-US", {
               year: "numeric",
@@ -137,7 +138,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
     };
 
     fetchPersonalInfo();
-  }, [reset, token, files]);
+  }, [reset]);
 
   const onSubmit = async (data: Data) => {
     try {
@@ -147,6 +148,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
       }
 
       console.log("submited data: ", data);
+      setSubmitting(true);
       const formData = new FormData();
       Object.keys(data).forEach((key) => {
         if (
@@ -168,6 +170,8 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
         }
       });
 
+      console.log("FormData to submit:", formData);
+
       // Use PATCH /submit/:email
       const response = await axios.patch(
         `${API_URL}/api/personalInfos/submit/${email}`,
@@ -180,6 +184,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
       );
 
       console.log("Response from server:", response.data);
+      setSubmitting(false);
       action(); // Proceed to next step if needed
     } catch (error) {
       console.error("Error submitting personal info:", error);
@@ -193,6 +198,10 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
       console.error(`Error deleting file ${fileKey}:`, error);
     }
   };
+
+  if (submitting) {
+    return <p>Submitting...</p>;
+  }
 
   return (
     <Card className="w-full max-w-lg">

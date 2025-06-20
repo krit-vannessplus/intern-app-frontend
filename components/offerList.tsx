@@ -204,7 +204,8 @@ const RequestList = () => {
                 >
                   <div>{f.email}</div>
                   <div className="text-xs text-gray-600">
-                    GPAF: {f.gpaF} | Completeness: {f.completeness} | F: {f.F}
+                    GPAF: {f.gpaF} | GPAA: {f.gpaA} | Completeness:{" "}
+                    {f.completeness} | F: {f.F}
                   </div>
                 </div>
                 <Separator className="my-2" />

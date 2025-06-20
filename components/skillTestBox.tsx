@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { Offer } from "@/utils/typeInterface";
+import { set } from "zod";
 
 interface SlillTestBoxProps {
   action: () => void;
@@ -36,6 +37,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
   const [dueTime, setDueTime] = useState("");
   const [skillTests, setSkillTests] = useState<OfferSkillTest[]>([]);
   const [newFiles, setNewFiles] = useState<Record<string, File[]>>({});
+  const [submitting, setSubmitting] = useState(false);
   const [userStatusUpdated, setUserStatusUpdated] = useState(false);
   const router = useRouter();
 
@@ -63,6 +65,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
     const test = skillTests.find((t) => t.name === testName);
     if (!test) return;
     const fd = new FormData();
+    setSubmitting(true);
     fd.append("keepFiles", JSON.stringify(test.uploadedFiles));
     try {
       const { data } = await axios.patch(
@@ -72,18 +75,19 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
         fd,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
       );
       enrichSkillTest(data.offer);
       if (data.allSubmitted) {
+        setSubmitting(false);
         window.location.reload();
       }
     } catch (e) {
       console.error("Auto‐submit error:", e);
     }
+    setSubmitting(false);
   };
 
   // 1) Fetch user → offer → enrich
@@ -127,7 +131,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
     }
   }, [dueTime, skillTests, handleAutoSubmit]);
 
-  // 3) When all submitted → bump user status
+  // // 3) When all submitted → bump user status
   useEffect(() => {
     if (
       skillTests.length > 0 &&
@@ -140,7 +144,10 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
           { status: "considering", email },
           { headers: { Authorization: `Bearer ${token}` } }
         )
-        .then(() => setUserStatusUpdated(true))
+        .then(() => {
+          setUserStatusUpdated(true);
+          console.log("User status updated to considering");
+        })
         .catch((e) => console.error("User status error:", e));
     }
   }, [skillTests, userStatusUpdated, email, token]);
@@ -199,7 +206,6 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
@@ -221,6 +227,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
     if (!email) return;
     const test = skillTests.find((t) => t.name === testName);
     if (!test) return;
+    setSubmitting(true);
     const fd = new FormData();
     fd.append("keepFiles", JSON.stringify(test.uploadedFiles));
     (newFiles[testName] || []).forEach((f) => fd.append("file", f));
@@ -233,7 +240,6 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
         fd,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
@@ -245,11 +251,13 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
         return c;
       });
       if (data.allSubmitted) {
+        setSubmitting(false);
         window.location.reload();
       }
     } catch (e) {
       console.error("Submit error:", e);
     }
+    setSubmitting(false);
   };
 
   // DISMISS one test
@@ -288,6 +296,9 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
 
   const maxRank = skillTests.length;
 
+  if (submitting) {
+    return <p>Submitting...</p>;
+  }
   return (
     <Card className="w-full max-w-3xl mx-auto space-y-6">
       <CardHeader>
