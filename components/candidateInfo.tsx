@@ -55,7 +55,6 @@ export default function CandidateInfo({
   const [user, setUser] = useState<User | null>(null); // email, role, status
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null);
   const [offer, setOffer] = useState<Offer | null>(null);
-  const [requestData, setRequestData] = useState<Request | null>(null);
   const [filter, setFilter] = useState<Filter | null>(null); // for future filtering needs
   const [result, setResult] = useState<Result | null>(null); // for future result handling
 
