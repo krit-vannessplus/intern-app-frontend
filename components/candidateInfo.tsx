@@ -17,7 +17,6 @@ import {
   Result,
   PersonalInfo,
   Offer,
-  Request,
   Filter,
   SkillTestOffer,
 } from "@/utils/typeInterface"; // Adjust the import path as needed
