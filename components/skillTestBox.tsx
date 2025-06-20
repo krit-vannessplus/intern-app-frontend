@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { Offer } from "@/utils/typeInterface";
-import { set } from "zod";
 
 interface SlillTestBoxProps {
   action: () => void;

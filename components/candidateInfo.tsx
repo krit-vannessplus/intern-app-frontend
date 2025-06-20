@@ -100,17 +100,6 @@ export default function CandidateInfo({
           setOffer(of.offer ?? of);
         }
 
-        if (user.status !== "waiting") {
-          /* 4. resume request (holds PDF link) ----------------------------- */
-          const { data: req } = await axios.get(
-            `${API_URL}/api/requests/getRequest/${encodeURIComponent(
-              propEmail
-            )}`
-          );
-          console.log("Resume Request Record:", req);
-          setRequestData(req.request ?? req);
-        }
-
         if (
           user.status === "accepted" ||
           user.status === "rejected" ||
@@ -153,7 +142,7 @@ export default function CandidateInfo({
   return (
     <div className="max-w-xl mx-auto space-y-4 bg-white p-6 rounded-lg shadow-md">
       {/* Request Info */}
-      <RequestInfo email={user?.email} />
+      {user?.status !== "waiting" && <RequestInfo email={user?.email} />}
       {/* Candidate Info Card */}
       <Card className="w-full space-y-4">
         <CardHeader>
