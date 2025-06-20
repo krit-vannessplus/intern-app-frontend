@@ -8,6 +8,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import axios from "axios";
 
 interface RequestData {
   email: string;
@@ -16,10 +17,10 @@ interface RequestData {
 }
 
 interface RequestCardProps {
-  email: string;
+  email?: string;
 }
 
-const RequestCard: React.FC<RequestCardProps> = ({ email }) => {
+const RequestInfo: React.FC<RequestCardProps> = ({ email }) => {
   const [existingRequest, setExistingRequest] = useState<RequestData | null>(
     null
   );
@@ -28,12 +29,10 @@ const RequestCard: React.FC<RequestCardProps> = ({ email }) => {
   useEffect(() => {
     const fetchRequest = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/requests/email/${email}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch request");
-        }
-        const data: RequestData = await response.json();
-        setExistingRequest(data);
+        const { data } = await axios.get(
+          `${API_URL}/api/requests/getRequest/${email}`
+        );
+        setExistingRequest(data.request);
         console.log("Fetched request data:", data);
       } catch (err) {
         setError((err as Error).message);
@@ -51,10 +50,10 @@ const RequestCard: React.FC<RequestCardProps> = ({ email }) => {
     : `${existingRequest.resume}`;
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-lg font-semibold">
-          Request Application
+          Request Information
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -84,4 +83,4 @@ const RequestCard: React.FC<RequestCardProps> = ({ email }) => {
   );
 };
 
-export default RequestCard;
+export default RequestInfo;

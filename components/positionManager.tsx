@@ -66,6 +66,22 @@ const PositionManager = () => {
   return (
     <div className="max-w-xl mx-auto space-y-4 bg-white p-6 rounded-lg shadow-md">
       <h1 className="text-xl font-bold">Positions</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>Create New Position</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Input
+            type="text"
+            value={newPositionName}
+            onChange={(e) => setNewPositionName(e.target.value)}
+            placeholder="Enter position name"
+          />
+        </CardContent>
+        <CardFooter>
+          <Button onClick={createPosition}>Create</Button>
+        </CardFooter>
+      </Card>
       {loading ? (
         <p>Loading positions...</p>
       ) : (
@@ -93,22 +109,6 @@ const PositionManager = () => {
                 </CardFooter>
               </Card>
             ))}
-          <Card>
-            <CardHeader>
-              <CardTitle>Create New Position</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Input
-                type="text"
-                value={newPositionName}
-                onChange={(e) => setNewPositionName(e.target.value)}
-                placeholder="Enter position name"
-              />
-            </CardContent>
-            <CardFooter>
-              <Button onClick={createPosition}>Create</Button>
-            </CardFooter>
-          </Card>
         </div>
       )}
     </div>

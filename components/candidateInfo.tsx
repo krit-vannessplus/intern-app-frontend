@@ -21,6 +21,7 @@ import {
   Filter,
   SkillTestOffer,
 } from "@/utils/typeInterface"; // Adjust the import path as needed
+import RequestInfo from "./requestInfo";
 
 interface CandidateInfoProps {
   email: string;
@@ -151,8 +152,10 @@ export default function CandidateInfo({
 
   return (
     <div className="max-w-xl mx-auto space-y-4 bg-white p-6 rounded-lg shadow-md">
+      {/* Request Info */}
+      <RequestInfo email={user?.email} />
       {/* Candidate Info Card */}
-      <Card className="max-w-lg space-y-4">
+      <Card className="w-full space-y-4">
         <CardHeader>
           <CardTitle className="text-xl">
             Candidate Info: <span className="font-normal">{propEmail}</span>
@@ -252,7 +255,7 @@ export default function CandidateInfo({
               );
             })}
 
-          {/* resume PDF */}
+          {/* resume PDF
           {requestData?.resume && (
             <div>
               <Label>Resume</Label>
@@ -265,7 +268,7 @@ export default function CandidateInfo({
                 View PDF
               </a>
             </div>
-          )}
+          )} */}
           {filter && (
             <div className="space-y-4">
               <div>
@@ -289,7 +292,7 @@ export default function CandidateInfo({
 
       {/* Offer Details Card */}
       {offer && (
-        <Card>
+        <Card className="w-full space-y-4 ">
           <CardHeader>
             <CardTitle>Offer Details</CardTitle>
           </CardHeader>

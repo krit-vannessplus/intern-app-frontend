@@ -41,7 +41,10 @@ export default function ResultBox({ email }: ResultBoxProps) {
             <p className="text-md">
               Congratulation, you&apos;ve been accepted.
             </p>
-            <p className="text-md">Positions: {result.positions.join(", ")}</p>
+            <p className="text-md">
+              <strong>Positions: </strong>
+              {result.positions.join(", ")}
+            </p>
           </div>
         ) : (
           <div>
