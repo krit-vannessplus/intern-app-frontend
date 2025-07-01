@@ -1,6 +1,3 @@
-import { off } from "process";
-import { number } from "zod";
-
 export interface Result {
   email: string;
   result: string;
@@ -17,6 +14,7 @@ export interface PersonalInfo {
   mobile: string;
   address: string;
   dob: string; // ISO date string
+  bloodType: string;
   lineId: string;
   university: string;
   qualification: string;

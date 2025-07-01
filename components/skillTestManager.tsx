@@ -81,7 +81,14 @@ const SkillTestManager = () => {
 
   // Create a new skill test, including the file and selected position.
   const createSkillTest = async () => {
-    if (!newSkillTestName || !newSkillTestPdf || !newSkillTestPosition) return;
+    if (!newSkillTestName || !newSkillTestPosition) {
+      alert("Please fill all fields.");
+      return;
+    }
+    if (!newSkillTestPdf) {
+      alert("Please upload a PDF instruction file.");
+      return;
+    }
     try {
       const formData = new FormData();
       formData.append("name", newSkillTestName);

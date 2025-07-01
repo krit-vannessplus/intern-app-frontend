@@ -14,80 +14,25 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-
-// --- Type Definitions ---
-
-// A Position type for available jobs.
-interface Position {
-  name: string;
-  availability: boolean; // Optional, if you want to track availability
-}
-
-// The shape of the form values.
-interface RequestFormValues {
-  email: string;
-  positions: string[]; // Checkboxes will return an array of strings.
-  resume: FileList; // FileList provided by the file input.
-}
-
-// The shape of the request object returned by the backend.
-interface RequestData {
-  email: string;
-  positions: string[]; // Stored as an array (or a comma-separated string that we parse)
-  resume: string; // URL or file path to the resume.
-}
-
-// The User type with email and status.
-interface User {
-  email: string;
-  status: string; // e.g., "waiting", "requesting", "offering"
-}
+import { Position, Request, User } from "@/utils/typeInterface";
+import { useRouter } from "next/navigation";
 
 // --- RequestBox Component ---
-
-const RequestBox: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [existingRequest, setExistingRequest] = useState<RequestData | null>(
-    null
-  );
+export function RequestBox(user: User) {
+  const [existingRequest, setExistingRequest] = useState<Request | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [positions, setPositions] = useState<Position[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const Router = useRouter();
 
   // react-hook-form
-  const { register, handleSubmit, reset } = useForm<RequestFormValues>();
+  const { register, handleSubmit, reset } = useForm<Request>();
 
   // ------------------------------------
-  // 1) Fetch user & positions ONCE
+  // 1) Fetch positions ONCE
   // ------------------------------------
   useEffect(() => {
-    (async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("User is not authenticated. No token found.");
-          return;
-        }
-
-        const { data: userData } = await axios.get(
-          `${API_URL}/api/users/user`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        if (!userData?.email) {
-          setError("User email not found in user status response.");
-          return;
-        }
-
-        setUser(userData as User); // ⬅️  triggers the second effect
-        console.log("User data fetched:", userData);
-      } catch (err) {
-        console.error("Error fetching user status:", err);
-        setError("Error fetching user information.");
-      }
-    })();
-
     (async () => {
       try {
         const { data } = await axios.get(
@@ -105,13 +50,10 @@ const RequestBox: React.FC = () => {
   // 2) *Every time* `user` changes, pull (or clear) the request
   // ------------------------------------
   useEffect(() => {
-    if (!user?.email) return; // still null? skip
-    if (user.status !== "requesting") {
-      // only keep request in that state
+    if (user.status === "waiting") {
       setExistingRequest(null);
       return;
     }
-
     const fetchRequest = async () => {
       console.log("Fetching request for user:", user.email);
       try {
@@ -131,27 +73,22 @@ const RequestBox: React.FC = () => {
           console.log("Request data fetched:", data.request);
         }
       } catch (err) {
-        // if (axios.isAxiosError(err) && err.response?.status === 404) {
-        //   setExistingRequest(null); // user has no request yet
-        // } else {
         console.error("Error fetching request:", err);
         setError("Error fetching your request data.");
-        //}
       }
     };
-
     fetchRequest();
   }, [user, reset]); // <-- ONLY depends on user (and reset from RHF)
 
   // onSubmit handler for the form.
-  const onSubmit: SubmitHandler<RequestFormValues> = async (data) => {
+  const onSubmit: SubmitHandler<Request> = async (data) => {
     setError(null);
-    setLoading(true);
+    setSubmitting(true);
 
     try {
       if (!user) {
         setError("User information is missing. Please log in again.");
-        setLoading(false);
+        setSubmitting(false);
         return;
       }
 
@@ -163,7 +100,7 @@ const RequestBox: React.FC = () => {
         formData.append("resume", data.resume[0]);
       } else if (!existingRequest) {
         setError("Resume upload is required for a new application.");
-        setLoading(false);
+        setSubmitting(false);
         return;
       }
 
@@ -172,6 +109,7 @@ const RequestBox: React.FC = () => {
       formData.append("positions", positionsStr);
 
       // Determine endpoint and HTTP method based on whether a request exists.
+      const token = localStorage.getItem("token");
       let endpoint = `${API_URL}/api/requests/create`;
       let method: "POST" | "PUT" = "POST";
       if (existingRequest) {
@@ -183,14 +121,18 @@ const RequestBox: React.FC = () => {
         method,
         url: endpoint,
         data: formData,
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       });
-
-      // Update the user's status to "requesting" after submission.
-      await axios.patch(`${API_URL}/api/users/status`, {
-        email: user.email,
-        status: "requesting",
-      });
+      if (user.status === "waiting") {
+        // Update the user's status to "requesting" after submission.
+        await axios.patch(`${API_URL}/api/users/status`, {
+          email: user.email,
+          status: "requesting",
+        });
+      }
 
       if (response.data && response.data.request) {
         setExistingRequest(response.data.request);
@@ -200,7 +142,8 @@ const RequestBox: React.FC = () => {
       console.error("Error submitting request:", submitError);
       setError("Error submitting your request. Please try again later.");
     }
-    setLoading(false);
+    window.location.reload();
+    setSubmitting(false);
   };
 
   // Handler for entering edit mode.
@@ -227,11 +170,12 @@ const RequestBox: React.FC = () => {
       : `${existingRequest.resume}`;
 
     return (
-      <Card className="w-full max-w-sm">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">
             Requesting... Your Application
           </CardTitle>
+          Please wait while we're considering your application
         </CardHeader>
         <CardContent>
           <div>
@@ -266,7 +210,7 @@ const RequestBox: React.FC = () => {
 
   // Otherwise, display the form to create/update the application.
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>
           {existingRequest ? "Edit Your Application" : "Internship Application"}
@@ -330,8 +274,8 @@ const RequestBox: React.FC = () => {
             />
           </div>
           <CardFooter className="mt-4">
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading
+            <Button type="submit" disabled={submitting} className="w-full">
+              {submitting
                 ? "Submitting..."
                 : existingRequest
                 ? "Update Application"
@@ -342,6 +286,4 @@ const RequestBox: React.FC = () => {
       </CardContent>
     </Card>
   );
-};
-
-export default RequestBox;
+}

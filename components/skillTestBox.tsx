@@ -17,10 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { Offer } from "@/utils/typeInterface";
 
-interface SlillTestBoxProps {
-  action: () => void;
-}
-
 type OfferSkillTest = {
   name: string;
   uploadedFiles: string[];
@@ -30,14 +26,17 @@ type OfferSkillTest = {
   pdf?: string;
   position?: string;
 };
+interface SkillTestBoxProps {
+  email: string;
+}
 
-export function SkillTestBox({ action }: SlillTestBoxProps) {
-  const [email, setEmail] = useState("");
+export function SkillTestBox({ email }: SkillTestBoxProps) {
   const [dueTime, setDueTime] = useState("");
   const [skillTests, setSkillTests] = useState<OfferSkillTest[]>([]);
   const [newFiles, setNewFiles] = useState<Record<string, File[]>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [userStatusUpdated, setUserStatusUpdated] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
   const router = useRouter();
 
   const token =
@@ -63,6 +62,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
     if (!email) return;
     const test = skillTests.find((t) => t.name === testName);
     if (!test) return;
+    handleSave(testName);
     const fd = new FormData();
     setSubmitting(true);
     fd.append("keepFiles", JSON.stringify(test.uploadedFiles));
@@ -89,24 +89,16 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
     setSubmitting(false);
   };
 
-  // 1) Fetch user → offer → enrich
+  // 1) Fetch offer → enrich
   useEffect(() => {
     if (!token) return;
     (async () => {
       try {
-        // get user email
-        const {
-          data: { email: userEmail },
-        } = await axios.get(`${API_URL}/api/users/user`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setEmail(userEmail);
-
         // get offer by email
         const {
           data: { offer },
         } = await axios.get(
-          `${API_URL}/api/offers/getByEmail/${encodeURIComponent(userEmail)}`
+          `${API_URL}/api/offers/getByEmail/${encodeURIComponent(email)}`
         );
         setDueTime(offer.dueTime);
 
@@ -114,7 +106,6 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
         enrichSkillTest(offer);
       } catch (e) {
         console.error("Error fetching user or offer:", e);
-        router.push("/login"); // Redirect to login on error
       }
     })();
   }, [router, token]);
@@ -128,28 +119,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
         if (t.status === "doing") handleAutoSubmit(t.name);
       });
     }
-  }, [dueTime, skillTests, handleAutoSubmit]);
-
-  // // 3) When all submitted → bump user status
-  useEffect(() => {
-    if (
-      skillTests.length > 0 &&
-      skillTests.every((t) => t.status === "submitted") &&
-      !userStatusUpdated
-    ) {
-      axios
-        .patch(
-          `${API_URL}/api/users/status`,
-          { status: "considering", email },
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-        .then(() => {
-          setUserStatusUpdated(true);
-          console.log("User status updated to considering");
-        })
-        .catch((e) => console.error("User status error:", e));
-    }
-  }, [skillTests, userStatusUpdated, email, token]);
+  }, [dueTime, skillTests, handleAutoSubmit, newFiles]);
 
   // delete an existing file from the UI list
   const handleDeleteFile = (testName: string, path: string) => {
@@ -186,6 +156,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
   // SAVE: updateOffer
   const handleSave = async (testName: string) => {
     if (!email) return;
+    setSaving(true);
     const updates = skillTests.map((t) => ({
       name: t.name,
       rank: t.rank,
@@ -219,6 +190,8 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
     } catch (e) {
       console.error("Save error:", e);
     }
+    console.log("save skill test: ", testName);
+    setSaving(false);
   };
 
   // SUBMIT one test
@@ -227,11 +200,13 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
     const test = skillTests.find((t) => t.name === testName);
     if (!test) return;
     setSubmitting(true);
+    handleSave(testName);
     const fd = new FormData();
     fd.append("keepFiles", JSON.stringify(test.uploadedFiles));
     (newFiles[testName] || []).forEach((f) => fd.append("file", f));
 
     try {
+      console.log("submitting skill test: ", testName);
       const { data } = await axios.patch(
         `${API_URL}/api/offers/submit/${encodeURIComponent(
           email
@@ -244,6 +219,10 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
         }
       );
       enrichSkillTest(data.offer);
+      console.log(
+        "skill test submitted successfully, response form server: ",
+        data
+      );
       setNewFiles((prev) => {
         const c = { ...prev };
         delete c[testName];
@@ -262,6 +241,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
   // DISMISS one test
   const handleDismiss = async (testName: string) => {
     if (!email) return;
+    setDismissing(true);
     try {
       const { data } = await axios.patch(
         `${API_URL}/api/offers/dismiss/${encodeURIComponent(
@@ -279,6 +259,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
     } catch (e) {
       console.error("Dismiss error:", e);
     }
+    setDismissing(false);
   };
 
   // Rank swapping
@@ -295,13 +276,9 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
 
   const maxRank = skillTests.length;
 
-  if (submitting) {
-    return <p>Submitting...</p>;
-  }
   return (
     <Card className="w-full max-w-3xl mx-auto space-y-6">
       <CardHeader>
-        <Button onClick={action}>Back</Button>
         <CardTitle className="text-xl">Skill Test Submissions</CardTitle>
         <p
           className={
@@ -320,6 +297,10 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
               hour12: false,
             }) || "Not set"
           }`}
+        </p>
+        <p className="text-md">
+          Skill test(s) below are for each position we offer for you, you can
+          submit only once before duetime.
         </p>
       </CardHeader>
       <CardContent>
@@ -464,7 +445,7 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
                   variant="outline"
                   onClick={() => handleDismiss(test.name)}
                 >
-                  Dismiss
+                  {dismissing ? "Dismissing" : "Dismiss"}
                 </Button>
                 {test.status === "doing" && (
                   <>
@@ -472,10 +453,10 @@ export function SkillTestBox({ action }: SlillTestBoxProps) {
                       variant="secondary"
                       onClick={() => handleSave(test.name)}
                     >
-                      Save
+                      {saving ? "Saving" : "Save"}
                     </Button>
                     <Button onClick={() => handleSubmit(test.name)}>
-                      Submit
+                      {submitting ? "Submitting" : "Submit"}
                     </Button>
                   </>
                 )}

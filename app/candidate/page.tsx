@@ -2,60 +2,64 @@
 import { API_URL } from "@/utils/config"; // Ensure you have the correct API URL
 import { useEffect, useState } from "react";
 import axios from "axios";
-import RequestBox from "@/components/requestBox";
+import { RequestBox } from "@/components/requestBox";
 import { PersonalInfoBox } from "@/components/personalInfoBox";
 import { SkillTestBox } from "@/components/skillTestBox";
-import { Navbar } from "@/components/navbar";
 import ConsideringBox from "@/components/consideringBox";
 import ResultBox from "@/components/resultBox";
 import { useRouter } from "next/navigation";
+import { User } from "@/utils/typeInterface";
+import { ProgressBar } from "@/components/progressBar";
 
 export default function CandidatePage() {
-  const [status, setStatus] = useState<string | null>(null);
-  const [showSkillTest, setShowSkillTest] = useState(false);
-  const [email, setEmail] = useState<string>("");
+  const [user, setUser] = useState<User | null>(null);
 
   const router = useRouter();
 
   useEffect(() => {
-    const fetchStatus = async () => {
+    const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token"); // Assuming you store the token
         const response = await axios.get(`${API_URL}/api/users/user`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setStatus(response.data.status);
-        setEmail(response.data.email);
-      } catch (error) {
-        console.error("Error fetching user status:", error);
-        router.push("/login"); // Redirect to login if there's an error
+        setUser(response.data);
+      } catch (err: any) {
+        console.error("Error fetching user:", err);
       }
     };
-
-    fetchStatus();
+    fetchUser();
   }, [router]);
 
   return (
-    <div className="bg-gray-100 w-full min-h-screen">
-      <Navbar />
-      <div className="justify-center m-auto pt-14 flex w-9/12 max-w-[450px]">
-        <div className="flex-1">
-          {/* status is waiting or requesting show the requestBox*/}
-          {(status === "waiting" || status === "requesting") && <RequestBox />}
-          {/* status is offering show the personalInfoBox and skillTestBox */}
-          {status === "offering" && !showSkillTest && (
-            <PersonalInfoBox action={() => setShowSkillTest(true)} />
-          )}
-          {showSkillTest && (
-            <SkillTestBox action={() => setShowSkillTest(false)} />
-          )}
-          {/* status is considering show the consideringBox */}
-          {status === "considering" && <ConsideringBox />}
-          {(status === "accepted" || status === "rejected") && (
-            <ResultBox email={email} />
-          )}
-        </div>
-      </div>
+    <div className="justify-center m-auto pt-14 flex-1 w-9/12 max-w-[450px] space-y-4">
+      <ProgressBar
+        status={
+          user?.status as
+            | "waiting"
+            | "requesting"
+            | "offering"
+            | "considering"
+            | "accepted"
+            | "rejected"
+            | "result"
+            | undefined
+        }
+      />
+
+      {/* status is waiting or requesting show the requestBox*/}
+      {(user?.status === "waiting" || user?.status === "requesting") && (
+        <RequestBox {...user} />
+      )}
+      {/* status is offering show the personalInfoBox and skillTestBox */}
+      {user?.status === "offering" && <PersonalInfoBox email={user.email} />}
+      {user?.status === "offering" && <SkillTestBox email={user.email} />}
+      {/* status is considering show the consideringBox */}
+      {user?.status === "considering" && <ConsideringBox email={user.email} />}
+      {/* status is accepted or rejected show the resultBox */}
+      {(user?.status === "accepted" || user?.status === "rejected") && (
+        <ResultBox email={user.email} />
+      )}
     </div>
   );
 }

@@ -34,6 +34,7 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ email, back }) => {
   const [request, setRequest] = useState<Request | null>(null);
   const [loading, setLoading] = useState(true);
   const [skillTests, setSkillTests] = useState<SkillTest[]>([]);
+  const [sending, setSending] = useState(false);
 
   // State for form: checked positions, chosen skill tests, and due time.
   const [selectedPositions, setSelectedPositions] = useState<{
@@ -117,6 +118,7 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ email, back }) => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setSending(true);
 
     /* ──────────────── 1. Assemble data from the UI ──────────────── */
     const tests = Object.keys(selectedPositions)
@@ -146,6 +148,7 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ email, back }) => {
           .filter(Boolean)
           .join("\n")
       );
+      setSending(false);
       return; // stop the submission if anything is missing
     }
 
@@ -179,6 +182,7 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ email, back }) => {
       await axios.put(`${API_URL}/api/requests/setOffered/${email}`);
 
       console.log("Offer flow completed successfully.");
+      setSending(false);
       back(); // leave the page / modal
     } catch (err) {
       console.error("Offer creation failed:", err);
@@ -261,7 +265,9 @@ const CreateOffer: React.FC<CreateOfferProps> = ({ email, back }) => {
                 <Button variant="outline" onClick={back}>
                   Back
                 </Button>
-                <Button type="submit">Send Offer</Button>
+                <Button type="submit">
+                  {sending ? "sending..." : "send offer"}
+                </Button>
               </div>
             </CardFooter>
           </form>

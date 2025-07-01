@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "@/utils/config";
+import { Navbar } from "@/components/navbar";
+import Footer from "@/components/footer";
 
 interface Props {
   children: React.ReactNode;
@@ -64,5 +66,11 @@ export default function ProtectedLayout({ children }: Props) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="bg-gray-100 w-full min-h-screen flex flex-col h-full">
+      <Navbar token={localStorage.getItem("token")} />
+      {children}
+      <Footer />
+    </div>
+  );
 }

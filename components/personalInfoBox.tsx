@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { API_URL } from "@/utils/config";
 import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { PersonalInfo } from "@/utils/typeInterface";
 import {
   Card,
   CardContent,
@@ -22,10 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import axios from "axios";
-
-interface PersonalInfoBoxProps {
-  action: () => void;
-}
+import { useRouter } from "next/navigation";
 
 interface FileUpload {
   videoClip?: string;
@@ -34,116 +32,114 @@ interface FileUpload {
   idCard?: string;
   slidePresentation?: string;
 }
-interface Data {
-  name: string;
-  nickname: string;
-  mobile: string;
-  address: string;
-  dob: string;
-  bloodType: string;
-  lineId: string;
-  university: string;
-  qualification: string;
-  major: string;
-  gpa: string;
-  reason: string;
-  otherReason?: string;
-  strength: string;
-  weakness: string;
-  opportunity: string;
-  threats: string;
-  recruitmentSource: string;
-  videoClip?: FileList; // File input
-  gradeReport?: FileList; // File input
-  homeRegistration?: FileList; // File input
-  idCard?: FileList; // File input
-  slidePresentation?: FileList; // File input
-}
 
-export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
-  const { control, register, handleSubmit, watch, reset } = useForm<Data>();
-  const [email, setEmail] = useState<string | null>(null);
+interface personalInfoProps {
+  email: string;
+}
+export function PersonalInfoBox({ email }: personalInfoProps) {
+  const router = useRouter();
+  const { control, register, handleSubmit, watch, reset } =
+    useForm<PersonalInfo>();
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null);
   const [dueTime, setDueTime] = useState<string | null>(null);
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const isPastDue = useMemo(() => {
+    if (!dueDate) return false;
+    return new Date() > dueDate;
+  }, [dueDate]);
+
   const [files, setFiles] = useState<FileUpload | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
-  // Fetch user email + existing personalInfo
+  // Fetch existing personalInfo
   useEffect(() => {
     const fetchPersonalInfo = async () => {
       try {
-        if (!token) return;
-
-        // 1️⃣ Get user email
-        const { data: userStatus } = await axios.get(
-          `${API_URL}/api/users/user`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const userEmail = userStatus.email;
-        setEmail(userEmail);
-
-        // 2️⃣ Fetch personalInfo by email
-        console.log(userEmail);
+        // Fetch personalInfo by email
+        console.log("Fetching personal info for email:", email);
         const { data: personalInfoData } = await axios.get(
-          `${API_URL}/api/personalInfos/getByEmail/${userEmail}`
+          `${API_URL}/api/personalInfos/getByEmail/${email}`
         );
-
-        // 3️⃣ Pre-fill form with existing data
-        if (personalInfoData.personalInfo) {
-          const info = personalInfoData.personalInfo;
-          console.log("info: ", info);
-          reset({
-            name: info.name || "",
-            nickname: info.nickname || "",
-            mobile: info.mobile || "",
-            address: info.address || "",
-            dob: info.dob ? info.dob.split("T")[0] : "",
-            bloodType: info.bloodType || "",
-            lineId: info.lineId || "",
-            university: info.university || "",
-            qualification: info.qualification || "",
-            major: info.major || "",
-            gpa: info.gpa || "",
-            reason: info.reason || "",
-            otherReason: info.otherReason || "",
-            strength: info.strength || "",
-            weakness: info.weakness || "",
-            opportunity: info.opportunity || "",
-            threats: info.threats || "",
-            recruitmentSource: info.recruitmentSource || "",
-          });
-          setFiles({
-            videoClip: info.videoClip || "",
-            gradeReport: info.gradeReport || "",
-            homeRegistration: info.homeRegistration || "",
-            idCard: info.idCard || "",
-            slidePresentation: info.slidePresentation || "",
-          });
-          console.log("files: ", files);
-          setDueTime(
-            new Date(info.dueTime).toLocaleString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            })
-          );
-        }
+        setPersonalInfo(personalInfoData.personalInfo);
       } catch (error) {
         console.error("Error fetching personal info:", error);
       }
     };
-
     fetchPersonalInfo();
-  }, [reset]);
+  }, [router, refreshKey]);
 
-  const onSubmit = async (data: Data) => {
+  useEffect(() => {
+    if (personalInfo) {
+      console.log("personalInfo: ", personalInfo);
+      reset({
+        name: personalInfo.name || "",
+        nickname: personalInfo.nickname || "",
+        mobile: personalInfo.mobile || "",
+        address: personalInfo.address || "",
+        dob: personalInfo.dob ? personalInfo.dob.split("T")[0] : "",
+        bloodType: personalInfo.bloodType || "",
+        lineId: personalInfo.lineId || "",
+        university: personalInfo.university || "",
+        qualification: personalInfo.qualification || "",
+        major: personalInfo.major || "",
+        gpa: personalInfo.gpa || 0,
+        reason: personalInfo.reason || "",
+        otherReason: personalInfo.otherReason || "",
+        strength: personalInfo.strength || "",
+        weakness: personalInfo.weakness || "",
+        opportunity: personalInfo.opportunity || "",
+        threats: personalInfo.threats || "",
+        recruitmentSource: personalInfo.recruitmentSource || "",
+      });
+      setFiles({
+        videoClip: personalInfo.videoClip || "",
+        gradeReport: personalInfo.gradeReport || "",
+        homeRegistration: personalInfo.homeRegistration || "",
+        idCard: personalInfo.idCard || "",
+        slidePresentation: personalInfo.slidePresentation || "",
+      });
+      console.log("files: ", files);
+      setDueTime(
+        new Date(personalInfo.dueTime).toLocaleString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+      );
+      // AFTER setDueTime(...)
+      const dt = new Date(personalInfo.dueTime);
+      setDueDate(dt); // ← new
+      setDueTime(
+        // ← you already have this
+        dt.toLocaleString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+      );
+    }
+  }, [personalInfo, router]);
+
+  const onSubmit = async (data: PersonalInfo) => {
+    if (isPastDue) {
+      console.warn("Deadline passed - blocking submission.");
+      alert("Deadline has passed. Submission is closed.");
+      return;
+    }
+
     try {
       if (!token || !email) {
-        console.error("No token or email.");
+        console.error("No token or email. Pls login again.");
         return;
       }
 
@@ -160,12 +156,16 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
             "slidePresentation",
           ].includes(key)
         ) {
-          const fileKey = key as keyof Data;
-          if (data[fileKey] && (data[fileKey] as FileList).length > 0) {
+          const fileKey = key as keyof FileUpload;
+          if (
+            data[fileKey] &&
+            typeof data[fileKey] !== "string" &&
+            (data[fileKey] as FileList).length > 0
+          ) {
             formData.append(key, (data[fileKey] as FileList)[0]);
           }
         } else {
-          const dataKey = key as keyof Data;
+          const dataKey = key as keyof PersonalInfo;
           formData.append(key, data[dataKey] as string);
         }
       });
@@ -184,24 +184,29 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
       );
 
       console.log("Response from server:", response.data);
-      setSubmitting(false);
-      action(); // Proceed to next step if needed
+      setRefreshKey((prev) => prev + 1); // Trigger a re-render
+      router.refresh(); // Refresh the page to reflect changes
     } catch (error) {
       console.error("Error submitting personal info:", error);
+      alert("Failed to submit personal information. Please try again later.");
     }
+    setSubmitting(false);
   };
 
-  const handleDeleteFile = (fileKey: keyof FileUpload) => {
+  const handleDeleteFile = async (fileKey: keyof FileUpload) => {
     try {
-      axios.delete(`${API_URL}/api/personalInfos/file/${email}/${fileKey}`);
+      const res = await axios.delete(
+        `${API_URL}/api/personalInfos/file/${email}/${fileKey}`
+      );
+      console.log("Response from delete file:", res.data);
+      setFiles((prevFiles) => ({
+        ...prevFiles,
+        [fileKey]: "",
+      }));
     } catch (error) {
       console.error(`Error deleting file ${fileKey}:`, error);
     }
   };
-
-  if (submitting) {
-    return <p>Submitting...</p>;
-  }
 
   return (
     <Card className="w-full max-w-lg">
@@ -381,7 +386,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
-                    {files?.videoClip}
+                    Video Clip
                   </a>
 
                   <Button
@@ -405,7 +410,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
-                    {files?.gradeReport}
+                    Grade Report
                   </a>
 
                   <Button
@@ -433,7 +438,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
-                    {files?.homeRegistration}
+                    Copy of Home Registration
                   </a>
 
                   <Button
@@ -461,7 +466,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
-                    {files?.idCard}
+                    Copy of ID Card
                   </a>
 
                   <Button
@@ -489,7 +494,7 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
-                    {files?.slidePresentation}
+                    Slide Presentation
                   </a>
 
                   <Button
@@ -510,8 +515,17 @@ export function PersonalInfoBox({ action }: PersonalInfoBoxProps) {
           </div>
 
           <CardFooter className="flex-col gap-2 mt-4">
-            <Button type="submit" className="w-full">
-              Submit, next to skill test
+            {isPastDue && (
+              <p className="text-center text-red-600">
+                Deadline has passed. Submission is closed.
+              </p>
+            )}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={submitting || isPastDue}
+            >
+              {submitting ? "Submitting..." : "Submit"}
             </Button>
           </CardFooter>
         </form>

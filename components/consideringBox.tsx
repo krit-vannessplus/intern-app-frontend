@@ -27,58 +27,43 @@ function formatKey(key: string) {
     .replace(/^./, (str) => str.toUpperCase());
 }
 
-export default function ConsideringBox() {
-  const [email, setEmail] = useState<string | null>(null);
+interface ConsideringBoxProps {
+  email: string;
+}
+
+export default function ConsideringBox({ email }: ConsideringBoxProps) {
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null);
   const [offer, setOffer] = useState<Offer | null>(null);
   const [requestData, setRequestData] = useState<Request | null>(null); // holds resume request data
 
-  // JWT for Authorization header
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : "";
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1) fetch current user email
-        const {
-          data: { email: userEmail },
-        } = await axios.get(`${API_URL}/api/users/user`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!userEmail) return;
-        setEmail(userEmail);
-
         // 2) fetch personal info using the user email
         const { data: piData } = await axios.get(
-          `${API_URL}/api/personalInfos/getByEmail/${encodeURIComponent(
-            userEmail
-          )}`
+          `${API_URL}/api/personalInfos/getByEmail/${encodeURIComponent(email)}`
         );
         setPersonalInfo(piData.personalInfo || piData);
 
         // 3) fetch offer details using the same email
         const { data: offerData } = await axios.get(
-          `${API_URL}/api/offers/getByEmail/${encodeURIComponent(userEmail)}`
+          `${API_URL}/api/offers/getByEmail/${encodeURIComponent(email)}`
         );
         setOffer(offerData.offer || offerData);
 
         // 4) fetch the resume request that holds the resume URL
         const { data: reqData } = await axios.get(
-          `${API_URL}/api/requests/getRequest/${encodeURIComponent(userEmail)}`
+          `${API_URL}/api/requests/getRequest/${encodeURIComponent(email)}`
         );
         setRequestData(reqData.request);
       } catch (err) {
         console.error("Error during fetch:", err);
       }
     };
+    fetchData();
+  }, []);
 
-    if (token) {
-      fetchData();
-    }
-  }, [token]);
-
-  if (!personalInfo || !offer) {
+  if (!personalInfo || !offer || !requestData) {
     return <p>Loading…</p>;
   }
 

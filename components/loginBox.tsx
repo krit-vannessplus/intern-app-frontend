@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation"; // Import useRouter for navigation
 export function LoginBox() {
   const router = useRouter(); // Initialize router for redirect
   const [errorMessage, setErrorMessage] = useState(""); // State for handling errors
+  const [loading, setLoading] = useState(false); // State for loading status
 
   interface Data {
     email: string;
@@ -33,6 +34,7 @@ export function LoginBox() {
   } = useForm<Data>();
 
   const onSubmit = async (data: Data) => {
+    setLoading(true); // Set loading state to true when form is submitted
     console.log("Login data:", data); // Log the submitted data for debugging
     try {
       const response = await axios.post(
@@ -46,6 +48,7 @@ export function LoginBox() {
       const { token, role } = response.data;
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
+      setLoading(false); // Reset loading state after successful login
 
       // Redirect based on role
       if (role === "admin") {
@@ -59,6 +62,7 @@ export function LoginBox() {
       } else {
         setErrorMessage("Login failed");
       }
+      setLoading(false); // Reset loading state on error
     }
   };
 
@@ -101,7 +105,7 @@ export function LoginBox() {
           )}
           <CardFooter className="flex-col gap-2 mt-4">
             <Button type="submit" className="w-full">
-              Login
+              {loading ? "Logging in..." : "Login"}
             </Button>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}

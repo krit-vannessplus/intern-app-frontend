@@ -32,6 +32,7 @@ const schema = z.object({
 export function RegisterBox() {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState(""); // Handle errors
+  const [loading, setLoading] = useState(false); // Handle loading state
 
   const {
     register,
@@ -40,6 +41,7 @@ export function RegisterBox() {
   } = useForm({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: Data) => {
+    setLoading(true); // Set loading state to true when form is submitted
     try {
       const response = await axios.post(
         `${API_URL}/api/users/register`, // Replace with your API URL
@@ -50,6 +52,7 @@ export function RegisterBox() {
         }
       );
       console.log("Registration response:", response.data);
+      setLoading(false); // Reset loading state after successful registration
       alert("Registration successful! Please log in.");
       router.push("/login"); // Redirect to login page
     } catch (error) {
@@ -58,6 +61,7 @@ export function RegisterBox() {
       } else {
         setErrorMessage("Registration failed");
       }
+      setLoading(false); // Reset loading state on error
     }
   };
 
@@ -92,7 +96,7 @@ export function RegisterBox() {
           )}
           <CardFooter className="flex-col gap-2 mt-4">
             <Button type="submit" className="w-full">
-              Register
+              {loading ? "Registering..." : "Register"}
             </Button>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}

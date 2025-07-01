@@ -1,30 +1,8 @@
 "use client";
-
-import { useState, useEffect } from "react";
-import axios from "axios";
 import Image from "next/image";
+import LogoutButton from "@/components/logoutButton";
 
-import { API_URL } from "@/utils/config";
-import LogoutButton from "./logoutButton";
-import { User } from "@/utils/typeInterface";
-
-export function Navbar() {
-  const [user, setUser] = useState<User | null>(null);
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : "";
-
-  /* fetch current user once on mount */
-  useEffect(() => {
-    if (!token) return;
-
-    axios
-      .get(`${API_URL}/api/users/user`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(({ data }) => setUser(data))
-      .catch(() => setUser(null));
-  }, [token]);
-
+export function Navbar({ token }: { token: string | null }) {
   return (
     <nav className="flex items-center bg-white p-4">
       {/* logo */}
@@ -42,7 +20,7 @@ export function Navbar() {
       </span>
 
       {/* push everything after this to the far right */}
-      <div className="ml-auto">{user && <LogoutButton />}</div>
+      <div className="ml-auto">{token && <LogoutButton />}</div>
     </nav>
   );
 }

@@ -19,7 +19,6 @@ export default function ResultBox({ email }: ResultBoxProps) {
   useEffect(() => {
     // Simulate fetching result data based on the email
     const fetchResult = async () => {
-      // Replace with actual API call
       const res = await axios.get(
         `${API_URL}/api/results/get/${encodeURIComponent(email)}`
       );
