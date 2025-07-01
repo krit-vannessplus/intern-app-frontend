@@ -24,7 +24,7 @@ export default function CandidatePage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(response.data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching user:", err);
       }
     };

@@ -15,7 +15,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Position, Request, User } from "@/utils/typeInterface";
-import { useRouter } from "next/navigation";
 
 // --- RequestBox Component ---
 export function RequestBox(user: User) {
@@ -24,7 +23,6 @@ export function RequestBox(user: User) {
   const [positions, setPositions] = useState<Position[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const Router = useRouter();
 
   // react-hook-form
   const { register, handleSubmit, reset } = useForm<Request>();
@@ -175,7 +173,7 @@ export function RequestBox(user: User) {
           <CardTitle className="text-lg font-semibold">
             Requesting... Your Application
           </CardTitle>
-          Please wait while we're considering your application
+          Please wait while we&apos;re considering your application
         </CardHeader>
         <CardContent>
           <div>
